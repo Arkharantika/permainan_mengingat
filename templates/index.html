@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>game</title>
+  </head>
+  <body>
+    <h1>memory game</h1>
+
+    <br />
+    <form>
+      <label>masukan jumlah</label>
+      <input type="number" id="input1" required />
+      <button type="submit" id="sendBTN1">generate</button>
+    </form>
+    <br />
+    <form>
+      <label>masukan jumlah</label>
+      <input type="text" id="input2" required />
+      <button type="submit" id="sendBTN2">check jawaban</button>
+    </form>
+    <br />
+    <p id="responseMSG"></p>
+    <hr />
+    <!-- Audio -->
+    <audio
+      id="player"
+      src="{{ url_for('static', filename='wow.mp3') }}"
+    ></audio>
+    <!-- Play Sound Button -->
+    <button onclick="document.getElementById('player').play()">
+      Play Sound
+    </button>
+
+    <script>
+      document.addEventListener("DOMContentLoaded", function () {
+        const input1 = document.getElementById("input1");
+        const input2 = document.getElementById("input2");
+        const sendBTN1 = document.getElementById("sendBTN1");
+        const sendBTN2 = document.getElementById("sendBTN2");
+        const responseMessage = document.getElementById("responseMSG");
+
+        sendBTN1.addEventListener("click", function (evnet) {
+          evnet.preventDefault();
+          text = input1.value;
+
+          fetch("/input", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_input: text }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              responseMessage.textContent = data.message;
+
+              const player = document.getElementById("player");
+              player.src = "/static/wow.mp3?t=" + new Date().getTime();
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              responseMessage.textContent = "Something went wrong.";
+              responseMessage.style.color = "red";
+            });
+        });
+
+        sendBTN2.addEventListener("click", function (evnet) {
+          evnet.preventDefault();
+          text = input2.value;
+
+          fetch("/jawaban", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ user_input: text }),
+          })
+            .then((response) => response.json())
+            .then((data) => {
+              responseMessage.textContent = data.message;
+            })
+            .catch((error) => {
+              console.error("Error:", error);
+              responseMessage.textContent = "Something went wrong.";
+              responseMessage.style.color = "red";
+            });
+        });
+      });
+    </script>
+  </body>
+</html>
